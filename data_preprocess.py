@@ -9,14 +9,13 @@ from typing import *
 
 class preprocess:
 
-    def __init__(self, data_dir: str, box_path: str, img_path: str, entities: List[str], test_split: float = 0.2) -> None:
+    def __init__(self, data_dir: str, box_path: str, img_path: str, test_split: float = 0.2) -> None:
         
         self.data_dir = data_dir
         self.box_path = box_path
         self.img_path = img_path
         self.test_split = test_split
         self.ent_path = self.data_dir+'entities/'
-        self.entities = entities
         self.data_list = []
 
 

@@ -6,6 +6,8 @@
     "local_world_size":4,
     "local_rank":-1,
 
+    "entities" : ["address","name","number"],
+
     "model_arch": {
         "type": "PICKModel",
         "args": {

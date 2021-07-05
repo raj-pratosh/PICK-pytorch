@@ -2,7 +2,7 @@
 # @Author: Wenwen Yu
 # @Created Time: 7/8/2020 9:34 PM
 
-from data_preprocess import preprocess
+import json
 
 #Entities_list = [
 #    "company",
@@ -10,5 +10,7 @@ from data_preprocess import preprocess
 #    "date",
 #    "total"
 #]
+config_file = open("config.json", "r")
+config_file = json.load(config_file)
 
-Entities_list = preprocess.entities
+Entities_list = config_file["entities"]

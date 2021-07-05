@@ -12,6 +12,7 @@ from pathlib import Path
 
 from torchtext.data import Field, RawField
 import numpy as np
+import pandas as pd
 
 from utils.entities_list import Entities_list
 from utils.class_utils import keys_vocab_cls, iob_labels_vocab_cls, entities_vocab_cls
@@ -227,41 +228,29 @@ class Document:
 
 
 def read_gt_file_with_box_entity_type(filepath: str):
-    with open(filepath, 'r', encoding='utf-8') as f:
-        document_text = f.read()
-
-    # match pattern in document: index,x1,y1,x2,y2,x3,y3,x4,y4,transcript,box_entity_type
-    regex = r"^\s*(-?\d+)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*," \
-            r"\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,(.*),(.*)\n?$"
-
-    matches = re.finditer(regex, document_text, re.MULTILINE)
-
-    res = []
-    for matchNum, match in enumerate(matches, start=1):
-        index = int(match.group(1))
-        points = [float(match.group(i)) for i in range(2, 10)]
-        transcription = str(match.group(10))
-        entity_type = str(match.group(11))
-        res.append((index, points, transcription, entity_type))
+    
+    combine = lambda idx, pt, trans, ent: (idx, pt, str(trans), str(ent)) 
+    
+    file_data = pd.read_csv(filepath, sep = '\t', header = None, names = ['index','x1','y1','x2','y2','x3','y3','x4','y4','transcript','entity'])
+    
+    index, transcript, entity = file_data['index'],  file_data['transcript'], file_data['entity']
+    points = file_data.loc[:,'x1':'y4'].values.tolist()
+    res = list(map(combine, index, points, transcript, entity))
+    
     return res
 
 
 def read_ocr_file_without_box_entity_type(filepath: str):
-    with open(filepath, 'r', encoding='utf-8') as f:
-        document_text = f.read()
-
-    # match pattern in document: index,x1,y1,x2,y2,x3,y3,x4,y4,transcript
-    regex = r"^\s*(-?\d+)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*," \
-            r"\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,(.*)\n?$"
-
-    matches = re.finditer(regex, document_text, re.MULTILINE)
-
-    res = []
-    for matchNum, match in enumerate(matches, start=1):
-        index = int(match.group(1))
-        points = [float(match.group(i)) for i in range(2, 10)]
-        transcription = str(match.group(10))
-        res.append((index, points, transcription))
+    
+    combine = lambda idx, pt, trans: (idx, pt, str(trans)) 
+    
+    file_data = pd.read_csv(filepath, sep = '\t', header = None, names = ['index','x1','y1','x2','y2','x3','y3','x4','y4','transcript','entity'])
+    
+    file_data = file_data.drop('entity', axis = 1)
+    index, transcript = file_data['index'],  file_data['transcript']
+    points = file_data.loc[:,'x1':'y4'].values.tolist()
+    res = list(map(combine, index, points, transcript))
+    
     return res
 
 

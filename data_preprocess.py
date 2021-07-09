@@ -40,13 +40,13 @@ class preprocess:
             os.mkdir(en_path)
 
             for index, row in file.iterrows():
-                shutil.copy(self.box_path+str(row[2])+".tsv", bx_path)
-                shutil.copy(self.img_path+str(row[2])+".jpg", im_path)
-                shutil.copy(self.ent_path +str(row[2])+".txt", en_path)
+                shutil.move(self.box_path+str(row[1])+".tsv", bx_path)
+                shutil.move(self.img_path+str(row[1])+".jpg", im_path)
+                shutil.move(self.ent_path +str(row[1])+".txt", en_path)
                 
-            file.drop(['Unnamed: 0'], axis = 1,inplace = True)
-            file.reset_index(inplace= True)
-            file.drop(['index'], axis = 1, inplace = True)
+            #file.drop(['Unnamed: 0'], axis = 1,inplace = True)
+            #file.reset_index(inplace= True)
+            #file.drop(['index'], axis = 1, inplace = True)
             file.to_csv(root_dir+nm+'_samples_list.csv', header = False)
 
 
@@ -96,7 +96,7 @@ class preprocess:
 if __name__ == '__main__':
 
     args = argparse.ArgumentParser(description = 'PyTorch PICK data preprocessing')
-    args.add_argument('-data_dir', '--data_dir', default = None, type = str, help = 'directory of the input datas (default: None)')
+    args.add_argument('-data_dir', '--data_dir', default = '', type = str, help = 'directory of the input datas (default: None)')
     args.add_argument('-box_path', '--box_path', default = None, type = str, help = 'directory of the boxes and transcripts files (default: None)')
     args.add_argument('-img_path', '--img_path', default = None, type = str, help = 'directory of the image files (default: None)')
     args.add_argument('-test_data_split', '--test_data_split', default = 0.2, type = int, help = 'size of the test data (default: 0.2)')

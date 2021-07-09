@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as  np
-import json, os, shutil
+import json, os, shutil,argparse
 from collections import ChainMap
 from sklearn.model_selection import train_test_split
 from typing import *
@@ -21,19 +21,23 @@ class preprocess:
 
     def __call__(self) -> None:
         
-
         def move_data(file: Any, train: bool ) -> None:
 
             if train: 
-                root_dir = 'train_data/'
+                root_dir = 'PICK-pytorch/data/train_data/'
                 nm = 'train'
             else: 
-                root_dir = 'test_data/'
+                root_dir = 'PICK-pytorch/data/test_data/'
                 nm = 'test'
 
             bx_path = root_dir+'boxes_and_transcripts/'
             im_path = root_dir+'images/'
             en_path = root_dir+'entities/'
+            
+            os.mkdir(root_dir)
+            os.mkdir(bx_path)
+            os.mkdir(im_path)
+            os.mkdir(en_path)
 
             for index, row in file.iterrows():
                 shutil.copy(self.box_path+str(row[2])+".tsv", bx_path)
@@ -46,7 +50,8 @@ class preprocess:
             file.to_csv(root_dir+nm+'_samples_list.csv', header = False)
 
 
-        self.data_list = self.__create_entities
+        self.data_list = self.__create_entities()
+        #self.data_list = pd.read_csv(self.data_dir+'data_list.csv')
         train, test= train_test_split(self.data_list, test_size = self.test_split, random_state = 42) 
         move_data(train, True)
         move_data(test, False)
@@ -60,18 +65,19 @@ class preprocess:
                 idx = np.where(tag == cls)[0]
                 return {cls:' '.join(text[idx])}
 
-        data_list = []
-
+        os.mkdir(self.ent_path)
+        
         for file in os.listdir(self.box_path):
    
-            data_list.append(['aadhar',file.replace('.tsv','')])
+            self.data_list.append(['file',file.replace('.tsv','')])
 
             df = pd.read_csv(self.box_path+file, sep = '\t', header = None, names = ['index','x1','y1','x2','y2','x3','y3','x4','y4','text','Ner_Tag'])
             classes = df['Ner_Tag'].unique()
             classes = np.delete(classes, np.where(classes=='others')[0])
 
             text, tag = df['text'].to_numpy() , df['Ner_Tag'].to_numpy()
-            
+            text = text.astype('str')
+
             result = list(map(class_extract,classes))
 
             outputjson = dict(ChainMap(*result))
@@ -85,3 +91,16 @@ class preprocess:
         self.data_list.to_csv(self.data_dir+'data_list.csv')
         
         return self.data_list
+
+
+if __name__ == '__main__':
+
+    args = argparse.ArgumentParser(description = 'PyTorch PICK data preprocessing')
+    args.add_argument('-data_dir', '--data_dir', default = None, type = str, help = 'directory of the input datas (default: None)')
+    args.add_argument('-box_path', '--box_path', default = None, type = str, help = 'directory of the boxes and transcripts files (default: None)')
+    args.add_argument('-img_path', '--img_path', default = None, type = str, help = 'directory of the image files (default: None)')
+    args.add_argument('-test_data_split', '--test_data_split', default = 0.2, type = int, help = 'size of the test data (default: 0.2)')
+
+    args = args.parse_args()
+    ppr = preprocess(args.data_dir, args.box_path, args.img_path)
+    ppr()

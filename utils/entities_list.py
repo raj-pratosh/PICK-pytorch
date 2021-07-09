@@ -10,7 +10,7 @@ import json
 #    "date",
 #    "total"
 #]
-config_file = open("config.json", "r")
+config_file = open("PICK-pytorch/config.json", "r")
 config_file = json.load(config_file)
 
 Entities_list = config_file["entities"]

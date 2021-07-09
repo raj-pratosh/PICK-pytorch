@@ -242,6 +242,7 @@ def read_gt_file_with_box_entity_type(filepath: str):
 
 def read_ocr_file_without_box_entity_type(filepath: str):
     
+    # TODO need to remove the entity column while using this in API
     combine = lambda idx, pt, trans: (idx, pt, str(trans)) 
     
     file_data = pd.read_csv(filepath, sep = '\t', header = None, names = ['index','x1','y1','x2','y2','x3','y3','x4','y4','transcript','entity'])
